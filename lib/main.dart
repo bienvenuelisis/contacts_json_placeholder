@@ -14,6 +14,7 @@ class ContactsApp extends StatelessWidget {
     return const MaterialApp(
       title: "Contacts",
       home: ContactsList(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
