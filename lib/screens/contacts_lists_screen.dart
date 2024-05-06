@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:contacts/models/user.dart';
+import 'package:contacts/screens/user_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactsList extends StatefulWidget {
   const ContactsList({super.key});
@@ -28,13 +31,20 @@ class _ContactsListState extends State<ContactsList> {
       Response response = await get(uri);
       debugPrint(" after get  users");
       if (response.statusCode == 200) {
-        users = jsonDecode(response.body)
-            .map<User>((e) => fromJsonToUser(e))
+        String body = response.body;
+
+        var json = jsonDecode(body);
+
+        users = json
+            .map<User>(
+              (e) => fromJsonToUser(e),
+            )
             .toList();
         setState(() {});
       }
     } catch (e) {
       debugPrint(e.toString());
+      if (e is SocketException) {}
     }
   }
 
@@ -53,6 +63,13 @@ class _ContactsListState extends State<ContactsList> {
                 final user = users![index];
 
                 return ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => UserDetailsScreen(id: user.id),
+                      ),
+                    );
+                  },
                   leading: CircleAvatar(
                     child: Text(user.id.toString()),
                   ),
@@ -60,7 +77,9 @@ class _ContactsListState extends State<ContactsList> {
                   subtitle: Text(user.email),
                   trailing: IconButton(
                     icon: const Icon(Icons.phone),
-                    onPressed: () {},
+                    onPressed: () {
+                      launchUrl(Uri.parse("tel:${user.phone}"));
+                    },
                   ),
                 );
               },
